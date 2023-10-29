@@ -61,7 +61,7 @@ modules:
           - x86_64
       - type: file
         url: https://github.com/Vencord/Vesktop/releases/download/v0.4.2/Vesktop-0.4.2-arm64.AppImage
-        sha256: sdaf
+        sha256: 1306d98e5de5b786ac998b8c01335f58675951d3ddfdad23a2134a37b0dfb445
         only-arches:
           - aarch64
       - type: file
