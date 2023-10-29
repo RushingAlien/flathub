@@ -1,0 +1,69 @@
+app-id: io.github.vencord.Vesktop
+branch: stable
+runtime: "org.freedesktop.Platform"
+runtime-version: "23.08"
+sdk: "org.freedesktop.Sdk"
+command: run.sh
+base: org.electronjs.Electron2.BaseApp
+base-version: "23.08"
+rename-icon: vencorddesktop
+rename-desktop-file: vencorddesktop.desktop
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --socket=pulseaudio
+  - --share=network
+  - --device=all
+  - --talk-name=org.freedesktop.ScreenSaver
+  - --filesystem=xdg-videos:ro
+  - --filesystem=xdg-pictures:ro
+  - --filesystem=xdg-download
+  - --talk-name=org.kde.StatusNotifierWatcher
+  - --talk-name=com.canonical.AppMenu.Registrar
+  - --talk-name=com.canonical.indicator.application
+  - --talk-name=com.canonical.Unity.LauncherEntry
+  - --own-name=org.kde.*
+  - --env=XCURSOR_PATH=/run/host/user-share/icons:/run/host/share/icons
+modules:
+  - name: twemoji-fonts
+    buildsystem: simple
+    sources:
+      - type: file
+        path: "emoji-font.conf"
+      - type: file
+        path: "Twemoji.ttf"
+    build-commands:
+      - mkdir -p /app/share/fonts/
+      - cp Twemoji.ttf /app/share/fonts/
+      - mkdir -p /app/etc/fonts/
+      - cp emoji-font.conf /app/etc/fonts/local.conf
+      - fc-cache -fv
+  - name: vesktop
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 ./run.sh /app/bin/run.sh
+      - chmod +x ./Vesktop*.AppImage
+      - ./Vesktop*.AppImage --appimage-extract
+      - mkdir -p /app/share/icons/hicolor
+      - install -D squashfs-root/vencorddesktop.desktop -t /app/share/applications/
+      - install -D io.github.vencord.Vesktop.appdata.xml /app/share/appdata/${FLATPAK_ID}.appdata.xml
+      - sed -i 's/^WMClass/X-WMClass/' /app/share/applications/vencorddesktop.desktop
+      - desktop-file-edit --set-key=Exec --set-value=run.sh /app/share/applications/vencorddesktop.desktop
+      - rm -r squashfs-root/usr/lib
+      - mv squashfs-root/usr/share/icons/hicolor/{16x16,32x32,48x48,64x64,128x128,256x256,512x512} /app/share/icons/hicolor
+      - mv squashfs-root /app/vesktop
+    sources:
+      - type: file
+        url: https://github.com/Vencord/Vesktop/releases/download/v0.4.2/Vesktop-0.4.2.AppImage
+        sha256: be3c2bec2d373faacecf42f6972cf7134700f907d70cbb704bb8e75fdd37d053
+        only-arches:
+          - x86_64
+      - type: file
+        url: https://github.com/Vencord/Vesktop/releases/download/v0.4.2/Vesktop-0.4.2-arm64.AppImage
+        sha256: sdaf
+        only-arches:
+          - aarch64
+      - type: file
+        path: io.github.vencord.Vesktop.appdata.xml
+      - type: file
+        path: run.sh
